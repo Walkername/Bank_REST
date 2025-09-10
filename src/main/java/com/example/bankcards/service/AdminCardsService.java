@@ -1,0 +1,92 @@
+package com.example.bankcards.service;
+
+import com.example.bankcards.dto.CardResponse;
+import com.example.bankcards.entity.Card;
+import com.example.bankcards.entity.User;
+import com.example.bankcards.enums.CardStatus;
+import com.example.bankcards.exception.CardNotFoundException;
+import com.example.bankcards.exception.UserNotFoundException;
+import com.example.bankcards.repository.CardsRepository;
+import com.example.bankcards.util.BankModelMapper;
+import com.example.bankcards.util.CardNumberCrypto;
+import com.example.bankcards.util.CardNumberGenerator;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.time.ZonedDateTime;
+import java.util.Date;
+import java.util.Optional;
+
+@Service
+@Transactional(readOnly = true)
+public class AdminCardsService {
+
+    private final CardsRepository cardsRepository;
+    private final BankModelMapper bankModelMapper;
+    private final AdminUsersService adminUsersService;
+    private final CardNumberCrypto cardNumberCrypto;
+
+    public AdminCardsService(
+            CardsRepository cardsRepository,
+            BankModelMapper bankModelMapper,
+            AdminUsersService adminUsersService,
+            @Value("${spring.card-number.encryption.secret}") String secret
+    ) {
+        this.cardsRepository = cardsRepository;
+        this.bankModelMapper = bankModelMapper;
+        this.adminUsersService = adminUsersService;
+        this.cardNumberCrypto = new CardNumberCrypto(secret);
+    }
+
+    public CardResponse findOne(int id) {
+        Optional<Card> card = cardsRepository.findById(id);
+        if (card.isEmpty()) {
+            throw new CardNotFoundException("Card not found");
+        }
+        Card cardPresent = card.get();
+        CardResponse cardResponse = bankModelMapper.convertToCardResponse(cardPresent);
+        String decryptedCardNumber = cardNumberCrypto.decrypt(cardPresent.getCardNumber());
+        String lastFourDigits = decryptedCardNumber.substring(12);
+        String maskedCardNumber = "**** **** **** " + lastFourDigits;
+        cardResponse.setCardNumber(maskedCardNumber);
+        cardResponse.setOwnerId(cardPresent.getOwner().getId());
+        return cardResponse;
+    }
+
+    @Transactional
+    public void create(int userId) {
+        User owner = adminUsersService.findOne(userId);
+        if (owner == null) {
+            throw new UserNotFoundException("User not found");
+        }
+
+        String cardNumber = CardNumberGenerator.generateCardNumber();
+        Date expiresAt = Date.from(ZonedDateTime.now().plusYears(4).toInstant());
+        Card card = new Card(
+                cardNumberCrypto.encrypt(cardNumber),
+                owner,
+                expiresAt,
+                CardStatus.ACTIVE,
+                BigDecimal.ZERO
+        );
+
+        cardsRepository.save(card);
+    }
+
+    @Transactional
+    public void setStatus(int id, CardStatus status) {
+        Optional<Card> card = cardsRepository.findById(id);
+        if (card.isEmpty()) {
+            throw new CardNotFoundException("Card not found");
+        }
+        card.get().setStatus(status);
+    }
+
+    @Transactional
+    public void deleteCard(int id) {
+        cardsRepository.deleteById(id);
+    }
+
+}
