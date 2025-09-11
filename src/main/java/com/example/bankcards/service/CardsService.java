@@ -3,7 +3,6 @@ package com.example.bankcards.service;
 import com.example.bankcards.dto.CardNumberResponse;
 import com.example.bankcards.dto.CardResponse;
 import com.example.bankcards.dto.PageResponse;
-import com.example.bankcards.dto.TransactionRequest;
 import com.example.bankcards.entity.Card;
 import com.example.bankcards.enums.CardStatus;
 import com.example.bankcards.exception.*;
@@ -11,7 +10,6 @@ import com.example.bankcards.repository.CardsRepository;
 import com.example.bankcards.specifications.CardSpecifications;
 import com.example.bankcards.util.BankModelMapper;
 import com.example.bankcards.util.CardNumberCrypto;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -33,22 +31,16 @@ public class CardsService {
 
     public CardsService(
             CardsRepository cardsRepository,
-            @Value("${spring.card-number.encryption.secret}") String secret,
+            CardNumberCrypto cardNumberCrypto,
             BankModelMapper bankModelMapper) {
         this.cardsRepository = cardsRepository;
-        this.cardNumberCrypto = new CardNumberCrypto(secret);
+        this.cardNumberCrypto = cardNumberCrypto;
         this.bankModelMapper = bankModelMapper;
     }
 
     public CardResponse findOne(Long id, Long userId) {
         Card card = checkAuthorityAndGet(id, userId);
-        CardResponse cardResponse = bankModelMapper.convertToCardResponse(card);
-        String decryptedCardNumber = cardNumberCrypto.decrypt(card.getCardNumber());
-        String lastFourDigits = decryptedCardNumber.substring(12);
-        String maskedCardNumber = "**** **** **** " + lastFourDigits;
-        cardResponse.setCardNumber(maskedCardNumber);
-        cardResponse.setOwnerId(card.getOwner().getId());
-        return cardResponse;
+        return createCardResponse(card, userId);
     }
 
     public CardNumberResponse getCardNumber(Long id, Long userId) {
@@ -60,39 +52,7 @@ public class CardsService {
     @Transactional
     public void requestBlocking(Long id, Long userId) {
         Card card = checkAuthorityAndGet(id, userId);
-        card.setStatus(CardStatus.BLOCKED);
-    }
-
-    @Transactional
-    public void transfer(TransactionRequest request, Long userId) {
-        String encryptedFromCard = cardNumberCrypto.encrypt(request.getFromCard());
-        String encryptedToCard = cardNumberCrypto.encrypt(request.getToCard());
-        Optional<Card> fromCardOpt = cardsRepository.findByCardNumber(encryptedFromCard);
-        Optional<Card> toCardOpt = cardsRepository.findByCardNumber(encryptedToCard);
-        if (fromCardOpt.isEmpty() || toCardOpt.isEmpty()) {
-            throw new CardNotFoundException("Card not found");
-        }
-
-        Card fromCard = fromCardOpt.get();
-        Card toCard = toCardOpt.get();
-
-        if (!fromCard.getOwner().getId().equals(userId) || !toCard.getOwner().getId().equals(userId)) {
-            throw new NoAuthorityException("You do not have permission to transfer with these cards");
-        }
-        if (fromCard.getId().equals(toCard.getId()) || fromCard.getCardNumber().equals(toCard.getCardNumber())) {
-            throw new SameCardTransactionException("Transfer from the card to itself is not possible.");
-        }
-
-        BigDecimal balanceFromCard = fromCard.getBalance();
-        BigDecimal balanceToCard = toCard.getBalance();
-        BigDecimal newBalanceFromCard = balanceFromCard.subtract(request.getAmount());
-        if (newBalanceFromCard.compareTo(BigDecimal.ZERO) < 0) {
-            throw new CardInsufficientFunds("Insufficient funds");
-        }
-
-        fromCard.setBalance(newBalanceFromCard);
-        BigDecimal newBalanceToCard = balanceToCard.add(request.getAmount());
-        toCard.setBalance(newBalanceToCard);
+        card.setStatus(CardStatus.BLOCK_REQUESTED);
     }
 
     public BigDecimal getBalance(Long id, Long userId) {
@@ -127,12 +87,7 @@ public class CardsService {
         Page<Card> cardsPage = cardsRepository.findAll(specification, pageable);
         List<CardResponse> cardResponses = new ArrayList<>();
         for (Card card : cardsPage.getContent()) {
-            CardResponse cardResponse = bankModelMapper.convertToCardResponse(card);
-            String decryptedCardNumber = cardNumberCrypto.decrypt(card.getCardNumber());
-            String lastFourDigits = decryptedCardNumber.substring(12);
-            String maskedCardNumber = "**** **** **** " + lastFourDigits;
-            cardResponse.setCardNumber(maskedCardNumber);
-            cardResponse.setOwnerId(userId);
+            CardResponse cardResponse = createCardResponse(card, userId);
             cardResponses.add(cardResponse);
         }
 
@@ -143,6 +98,15 @@ public class CardsService {
                 cardsPage.getTotalElements(),
                 cardsPage.getTotalPages()
         );
+    }
+
+    private CardResponse createCardResponse(Card card, Long userId) {
+        CardResponse cardResponse = bankModelMapper.convertToCardResponse(card);
+        String decryptedCardNumber = cardNumberCrypto.decrypt(card.getCardNumber());
+        String maskedCardNumber = cardNumberCrypto.transformToMaskedNumber(decryptedCardNumber);
+        cardResponse.setCardNumber(maskedCardNumber);
+        cardResponse.setOwnerId(userId);
+        return cardResponse;
     }
 
     private List<Sort.Order> createOrders(String[] sort) {

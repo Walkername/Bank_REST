@@ -46,13 +46,7 @@ public class AdminCardsService {
             throw new CardNotFoundException("Card not found");
         }
         Card cardPresent = card.get();
-        CardResponse cardResponse = bankModelMapper.convertToCardResponse(cardPresent);
-        String decryptedCardNumber = cardNumberCrypto.decrypt(cardPresent.getCardNumber());
-        String lastFourDigits = decryptedCardNumber.substring(12);
-        String maskedCardNumber = "**** **** **** " + lastFourDigits;
-        cardResponse.setCardNumber(maskedCardNumber);
-        cardResponse.setOwnerId(cardPresent.getOwner().getId());
-        return cardResponse;
+        return createCardResponse(cardPresent, cardPresent.getOwner().getId());
     }
 
     @Transactional
@@ -87,6 +81,15 @@ public class AdminCardsService {
     @Transactional
     public void deleteCard(Long id) {
         cardsRepository.deleteById(id);
+    }
+
+    private CardResponse createCardResponse(Card card, Long userId) {
+        CardResponse cardResponse = bankModelMapper.convertToCardResponse(card);
+        String decryptedCardNumber = cardNumberCrypto.decrypt(card.getCardNumber());
+        String maskedCardNumber = cardNumberCrypto.transformToMaskedNumber(decryptedCardNumber);
+        cardResponse.setCardNumber(maskedCardNumber);
+        cardResponse.setOwnerId(userId);
+        return cardResponse;
     }
 
 }

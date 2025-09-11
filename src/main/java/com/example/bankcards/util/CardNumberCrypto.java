@@ -1,14 +1,20 @@
 package com.example.bankcards.util;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
 
+@Component
 public class CardNumberCrypto {
 
     private final SecretKeySpec secretKey;
 
-    public CardNumberCrypto(String secret) {
+    public CardNumberCrypto(
+            @Value("${spring.card-number.encryption.secret}") String secret
+    ) {
         this.secretKey = new SecretKeySpec(secret.getBytes(), "AES");
     }
 
@@ -30,6 +36,11 @@ public class CardNumberCrypto {
         } catch (Exception e) {
             throw new RuntimeException("Decryption error", e);
         }
+    }
+
+    public String transformToMaskedNumber(String cardNumber) {
+        String lastFourDigits = cardNumber.substring(12);
+        return "**** **** **** " + lastFourDigits;
     }
 
 }

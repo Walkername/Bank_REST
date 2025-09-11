@@ -3,7 +3,6 @@ package com.example.bankcards.controller;
 import com.example.bankcards.dto.CardNumberResponse;
 import com.example.bankcards.dto.CardResponse;
 import com.example.bankcards.dto.PageResponse;
-import com.example.bankcards.dto.TransactionRequest;
 import com.example.bankcards.enums.CardStatus;
 import com.example.bankcards.security.UserPrincipal;
 import com.example.bankcards.service.CardsService;
@@ -47,15 +46,6 @@ public class CardsController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PatchMapping("/transfers")
-    public ResponseEntity<HttpStatus> transfer(
-            @RequestBody TransactionRequest transactionRequest,
-            @AuthenticationPrincipal UserPrincipal user
-    ) {
-        cardsService.transfer(transactionRequest, user.getUserId());
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
     @GetMapping("/{id}/balance")
     public ResponseEntity<BigDecimal> getBalance(
             @PathVariable Long id,
@@ -75,7 +65,7 @@ public class CardsController {
     @Operation(summary = "Get user cards", description = "Get list of user cards with pagination, sorting and filtration")
     @GetMapping("/cards")
     public ResponseEntity<PageResponse<CardResponse>> getCards(
-            @RequestParam(value = "page") Integer page,
+            @RequestParam(value = "page", defaultValue = "0") Integer page,
             @RequestParam(value = "limit", defaultValue = "10") Integer limit,
             @RequestParam(value = "sort", defaultValue = "balance:desc", required = false) String[] sort,
             @RequestParam(value = "status", required = false) CardStatus cardStatus,

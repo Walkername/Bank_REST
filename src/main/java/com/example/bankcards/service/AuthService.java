@@ -30,7 +30,7 @@ public class AuthService {
 
     @Transactional
     public void register(User user) {
-        if (usersRepository.existsById(user.getId())) {
+        if (usersRepository.existsByUsername(user.getUsername())) {
             throw new UserExistsException("User already exists");
         }
 
