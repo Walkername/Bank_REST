@@ -56,7 +56,7 @@ public class TransactionsService {
             throw new NoAuthorityException("You do not have permission to transfer with these cards");
         }
         if (fromCard.getId().equals(toCard.getId()) || fromCard.getCardNumber().equals(toCard.getCardNumber())) {
-            throw new SameCardTransactionException("Transfer from the card to itself is not possible.");
+            throw new SameCardTransactionException("Transfer from the card to itself is not possible");
         }
 
         BigDecimal balanceFromCard = fromCard.getBalance();

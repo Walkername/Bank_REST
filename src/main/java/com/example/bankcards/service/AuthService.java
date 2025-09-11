@@ -31,7 +31,7 @@ public class AuthService {
     @Transactional
     public void register(User user) {
         if (usersRepository.existsByUsername(user.getUsername())) {
-            throw new UserExistsException("User already exists");
+            throw new UserExistsException("Such username already exists");
         }
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));

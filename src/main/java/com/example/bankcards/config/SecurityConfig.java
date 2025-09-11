@@ -40,7 +40,9 @@ public class SecurityConfig {
                                 "/admin/**"
                         ).hasAuthority("ADMIN")
                         .requestMatchers(
-                                "/auth/register", "/auth/login", "/auth/refresh-token", "/v3/api-docs.yaml"
+                                "/auth/register", "/auth/login", "/auth/refresh-token", "/api-docs.yaml",
+                                "/swagger-ui/**", "/api-docs/**", "/swagger-resources/**", "/webjars/**",
+                                "/swagger-ui.html"
                         ).permitAll()
                         .anyRequest().hasAnyAuthority("USER", "ADMIN")
                 )

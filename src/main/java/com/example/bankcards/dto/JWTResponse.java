@@ -1,9 +1,20 @@
 package com.example.bankcards.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "JWT tokens response DTO")
 public class JWTResponse {
 
+    @Schema(
+            description = "JWT access token for authentication",
+            example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJCYW5rIGRldGFpbHMi..."
+    )
     private String accessToken;
 
+    @Schema(
+            description = "JWT refresh token for obtaining new access tokens",
+            example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJCYW5rIGRldGFpbHMi..."
+    )
     private String refreshToken;
 
     public JWTResponse(String accessToken, String refreshToken) {

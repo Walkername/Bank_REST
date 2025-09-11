@@ -80,6 +80,10 @@ public class AdminCardsService {
 
     @Transactional
     public void deleteCard(Long id) {
+        Optional<Card> card = cardsRepository.findById(id);
+        if (card.isEmpty()) {
+            throw new CardNotFoundException("Card not found");
+        }
         cardsRepository.deleteById(id);
     }
 

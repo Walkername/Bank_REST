@@ -1,8 +1,14 @@
 package com.example.bankcards.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "Exception response DTO containing error details")
 public class ExceptionResponse {
 
+    @Schema(description = "Error message", example = "Insufficient funds")
     private String error;
+
+    @Schema(description = "Timestamp when error occurred (milliseconds since epoch)", example = "1701427200000")
     private long timestamp;
 
     public ExceptionResponse(String error, long timestamp) {

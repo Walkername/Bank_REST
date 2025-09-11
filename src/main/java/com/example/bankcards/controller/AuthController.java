@@ -17,9 +17,15 @@ import com.example.bankcards.util.BankModelMapper;
 import com.example.bankcards.util.RequestValidator;
 import com.example.bankcards.util.UserValidator;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +33,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/auth")
 @CrossOrigin
-@Tag(name = "Authentication Controller", description = "APIs to authenticate to the system")
+@Tag(name = "Authentication Controller", description = "APIs for user authentication and token management")
 public class AuthController {
 
     private final BankModelMapper bankModelMapper;
@@ -44,7 +50,54 @@ public class AuthController {
         this.adminUsersService = adminUsersService;
     }
 
-    @Operation(summary = "Register in the system", description = "You can register with username and password")
+    @Operation(
+            summary = "Register new user",
+            description = "Register a new user with username and password"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "User registered successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Validation error or invalid request",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = {
+                                    @ExampleObject(
+                                            name = "Validation error",
+                                            value = "{\"error\": \"password - Password should be specified;\", \"timestamp\": \"1757618375981\"}"
+                                    ),
+                                    @ExampleObject(
+                                            name = "User exists",
+                                            value = "{\"error\": \"username - This username is already in use;\", \"timestamp\": \"1757618375981\"}"
+                                    )
+                            }
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Username already exists",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(
+                                    value = "{\"error\": \"Such username already exists\", \"timestamp\": \"1757618375981\"}"
+                            )
+                    )
+            )
+    })
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Authentication credentials for registration",
+            required = true,
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = AuthRequest.class),
+                    examples = @ExampleObject(
+                            value = "{\"username\": \"new_user\", \"password\": \"securePassword123\"}"
+                    )
+            )
+    )
     @PostMapping("/register")
     public ResponseEntity<HttpStatus> register(
             @RequestBody @Valid AuthRequest authRequest,
@@ -62,7 +115,66 @@ public class AuthController {
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
-    @Operation(summary = "Login to the system", description = "You can login to the system with username and password")
+    @Operation(
+            summary = "Login to the system",
+            description = "Authenticate user with username and password to receive JWT tokens"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Login successful",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = JWTResponse.class),
+                            examples = @ExampleObject(
+                                    value = "{\"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\", " +
+                                            "\"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"}"
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Validation error",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(
+                                    name = "Validation error",
+                                    value = "{\"error\": \"password - Password should be specified;\", \"timestamp\": \"1757618375981\"}"
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "User not found",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(
+                                    value = "{\"error\": \"User not found\", \"timestamp\": \"1757618375981\"}"
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Invalid credentials",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(
+                                    value = "{\"error\": \"Wrong credentials\", \"timestamp\": \"1757618375981\"}"
+                            )
+                    )
+            )
+    })
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Authentication credentials for login",
+            required = true,
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = AuthRequest.class),
+                    examples = @ExampleObject(
+                            value = "{\"username\": \"existing_user\", \"password\": \"userPassword123\"}"
+                    )
+            )
+    )
     @PostMapping("/login")
     public ResponseEntity<JWTResponse> login(
             @RequestBody @Valid AuthRequest authDTO,
@@ -86,7 +198,55 @@ public class AuthController {
         return new ResponseEntity<>(new JWTResponse(accessToken, refreshToken), HttpStatus.OK);
     }
 
-    @Operation(summary = "Refresh tokens", description = "Getting new pair of tokens with current refresh token")
+    @Operation(
+            summary = "Refresh JWT tokens",
+            description = "Obtain new access and refresh tokens using a valid refresh token"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Tokens refreshed successfully",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = JWTResponse.class),
+                            examples = @ExampleObject(
+                                    value = "{\"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\", " +
+                                            "\"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"}"
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid refresh token format",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(
+                                    value = "{\"error\": \"Invalid refresh token\", \"timestamp\": \"1757618375981\"}"
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "User not found",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(
+                                    value = "{\"error\": \"User not found\", \"timestamp\": \"1757618375981\"}"
+                            )
+                    )
+            )
+    })
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Refresh token request",
+            required = true,
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = RefreshTokenRequest.class),
+                    examples = @ExampleObject(
+                            value = "{\"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"}"
+                    )
+            )
+    )
     @PostMapping("/refresh-token")
     public ResponseEntity<JWTResponse> refreshToken(
             @RequestBody @Valid RefreshTokenRequest refreshTokenRequest

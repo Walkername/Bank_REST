@@ -33,6 +33,43 @@ spring:
     encryption:
       secret: bankrestcardcard
 
+springdoc:
+  api-docs:
+    path: /api-docs
+    enabled: true
+    groups:
+      enabled: true
+
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    display-request-duration: true
+    doc-expansion: none
+    default-model-expand-depth: 1
+    default-model-rendering: example
+    default-models-expand-depth: 1
+    deep-linking: true
+    filter: true
+    operations-sorter: alpha
+    tags-sorter: alpha
+    persist-authorization: true
+    show-common-extensions: true
+    show-extensions: true
+    try-it-out-enabled: true
+    urls:
+      - url: /api-docs
+        name: Bank Cards API
+
+  packages-to-scan:
+    - com.example.bankcards.controller
+    - com.example.bankcards.entity
+  paths-to-match: /**
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
+
+  cache:
+    disabled: true
+
 server:
   port: 8080
 
