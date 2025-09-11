@@ -10,7 +10,6 @@ import com.example.bankcards.repository.CardsRepository;
 import com.example.bankcards.util.BankModelMapper;
 import com.example.bankcards.util.CardNumberCrypto;
 import com.example.bankcards.util.CardNumberGenerator;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,12 +31,12 @@ public class AdminCardsService {
             CardsRepository cardsRepository,
             BankModelMapper bankModelMapper,
             AdminUsersService adminUsersService,
-            @Value("${spring.card-number.encryption.secret}") String secret
+            CardNumberCrypto cardNumberCrypto
     ) {
         this.cardsRepository = cardsRepository;
         this.bankModelMapper = bankModelMapper;
         this.adminUsersService = adminUsersService;
-        this.cardNumberCrypto = new CardNumberCrypto(secret);
+        this.cardNumberCrypto = cardNumberCrypto;
     }
 
     public CardResponse findOne(Long id) {

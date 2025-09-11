@@ -1,5 +1,6 @@
 package com.example.bankcards.util;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -12,6 +13,7 @@ public class CardNumberCrypto {
 
     private final SecretKeySpec secretKey;
 
+    @Autowired
     public CardNumberCrypto(
             @Value("${spring.card-number.encryption.secret}") String secret
     ) {

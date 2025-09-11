@@ -104,7 +104,7 @@ public class AdminCardsController {
             @PathVariable Long userId
     ) {
         adminCardsService.create(userId);
-        return ResponseEntity.ok(HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @Operation(
@@ -165,7 +165,7 @@ public class AdminCardsController {
             throw new WrongCardStatus("You can change card status only to ACTIVE or BLOCKED");
         }
         adminCardsService.setStatus(id, status);
-        return ResponseEntity.ok(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     @Operation(
@@ -198,7 +198,7 @@ public class AdminCardsController {
             @PathVariable("id") Long id
     ) {
         adminCardsService.deleteCard(id);
-        return ResponseEntity.ok(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
     }
 
 }

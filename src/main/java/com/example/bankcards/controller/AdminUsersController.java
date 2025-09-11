@@ -112,7 +112,7 @@ public class AdminUsersController {
             @PathVariable("id") Long id
     ) {
         adminUsersService.assignAdminRole(id);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     @Operation(
@@ -167,7 +167,7 @@ public class AdminUsersController {
             @RequestBody @Valid ChangeUsernameRequest request
     ) {
         adminUsersService.changeUsername(id, request.getUsername());
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     @Operation(

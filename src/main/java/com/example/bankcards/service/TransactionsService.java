@@ -8,7 +8,6 @@ import com.example.bankcards.repository.CardsRepository;
 import com.example.bankcards.repository.TransactionsRepository;
 import com.example.bankcards.util.CardNumberCrypto;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,9 +24,9 @@ public class TransactionsService {
 
     @Autowired
     public TransactionsService(
-            @Value("${spring.card-number.encryption.secret}") String secret,
+            CardNumberCrypto cardNumberCrypto,
             CardsRepository cardsRepository, TransactionsRepository transactionsRepository) {
-        this.cardNumberCrypto = new CardNumberCrypto(secret);
+        this.cardNumberCrypto = cardNumberCrypto;
         this.cardsRepository = cardsRepository;
         this.transactionsRepository = transactionsRepository;
     }

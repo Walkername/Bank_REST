@@ -112,7 +112,7 @@ public class AuthController {
         RequestValidator.validateRequest(bindingResult, RegistrationException::new);
         authService.register(newUser);
 
-        return ResponseEntity.ok(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     @Operation(

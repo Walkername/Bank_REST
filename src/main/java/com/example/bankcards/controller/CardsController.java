@@ -123,7 +123,7 @@ public class CardsController {
             @AuthenticationPrincipal UserPrincipal user
     ) {
         cardsService.requestBlocking(id, user.getUserId());
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     @Operation(
