@@ -91,12 +91,12 @@ public class AuthController {
     public ResponseEntity<JWTResponse> refreshToken(
             @RequestBody @Valid RefreshTokenRequest refreshTokenRequest
     ) {
-        int userId;
+        Long userId;
 
         try {
             //Checking if refresh token is valid
             DecodedJWT jwt = tokenService.validateRefreshToken(refreshTokenRequest.getRefreshToken());
-            userId = jwt.getClaim("id").asInt();
+            userId = jwt.getClaim("id").asLong();
 
             // Getting current user's refresh token in order to compare
             RefreshToken refreshToken = authService.findRefreshToken(userId);

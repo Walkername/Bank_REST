@@ -32,7 +32,7 @@ public class CardsController {
 
     @GetMapping("/{id}")
     public ResponseEntity<CardResponse> getCard(
-            @PathVariable int id,
+            @PathVariable Long id,
             @AuthenticationPrincipal UserPrincipal user
     ) {
         return new ResponseEntity<>(cardsService.findOne(id, user.getUserId()), HttpStatus.OK);
@@ -40,7 +40,7 @@ public class CardsController {
 
     @PatchMapping("/block/{id}")
     public ResponseEntity<String> blockCard(
-            @PathVariable int id,
+            @PathVariable Long id,
             @AuthenticationPrincipal UserPrincipal user
     ) {
         cardsService.requestBlocking(id, user.getUserId());
@@ -58,7 +58,7 @@ public class CardsController {
 
     @GetMapping("/{id}/balance")
     public ResponseEntity<BigDecimal> getBalance(
-            @PathVariable int id,
+            @PathVariable Long id,
             @AuthenticationPrincipal UserPrincipal user
     ) {
         return new ResponseEntity<>(cardsService.getBalance(id, user.getUserId()), HttpStatus.OK);
@@ -66,7 +66,7 @@ public class CardsController {
 
     @GetMapping("/{id}/card-number")
     public ResponseEntity<CardNumberResponse> getCardNumber(
-            @PathVariable("id") int id,
+            @PathVariable("id") Long id,
             @AuthenticationPrincipal UserPrincipal user
     ) {
         return new ResponseEntity<>(cardsService.getCardNumber(id, user.getUserId()), HttpStatus.OK);

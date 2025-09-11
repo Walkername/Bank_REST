@@ -53,13 +53,13 @@ public class AuthService {
         return userFound;
     }
 
-    public RefreshToken findRefreshToken(int userId) {
+    public RefreshToken findRefreshToken(Long userId) {
         Optional<RefreshToken> refreshTokenOptional = refreshTokensRepository.findByUserId(userId);
         return refreshTokenOptional.orElse(null);
     }
 
     @Transactional
-    public void updateRefreshToken(int userId, String newRefreshToken) {
+    public void updateRefreshToken(Long userId, String newRefreshToken) {
         Optional<RefreshToken> refreshToken = refreshTokensRepository.findByUserId(userId);
         // If DB does not store refresh token for this user, then
         // it just will be saved in DB

@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 
 public class CardSpecifications {
 
-    public static Specification<Card> byUserId(Integer userId) {
+    public static Specification<Card> byUserId(Long userId) {
         return (root, query, criteriaBuilder) ->
                 criteriaBuilder.equal(root.get("owner").get("id"), userId);
     }

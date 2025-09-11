@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface UsersRepository extends JpaRepository<User, Integer> {
+public interface UsersRepository extends JpaRepository<User, Long> {
     Optional<User> findByUsername(@NotBlank(message = "Username should not be blank") String username);
 
     boolean existsByUsername(@NotBlank(message = "Username should not be blank") String username);

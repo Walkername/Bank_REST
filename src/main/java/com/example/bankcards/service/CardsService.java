@@ -40,7 +40,7 @@ public class CardsService {
         this.bankModelMapper = bankModelMapper;
     }
 
-    public CardResponse findOne(int id, int userId) {
+    public CardResponse findOne(Long id, Long userId) {
         Card card = checkAuthorityAndGet(id, userId);
         CardResponse cardResponse = bankModelMapper.convertToCardResponse(card);
         String decryptedCardNumber = cardNumberCrypto.decrypt(card.getCardNumber());
@@ -51,20 +51,20 @@ public class CardsService {
         return cardResponse;
     }
 
-    public CardNumberResponse getCardNumber(int id, int userId) {
+    public CardNumberResponse getCardNumber(Long id, Long userId) {
         Card card = checkAuthorityAndGet(id, userId);
         String decryptedCardNumber = cardNumberCrypto.decrypt(card.getCardNumber());
         return new CardNumberResponse(decryptedCardNumber);
     }
 
     @Transactional
-    public void requestBlocking(int id, int userId) {
+    public void requestBlocking(Long id, Long userId) {
         Card card = checkAuthorityAndGet(id, userId);
         card.setStatus(CardStatus.BLOCKED);
     }
 
     @Transactional
-    public void transfer(TransactionRequest request, int userId) {
+    public void transfer(TransactionRequest request, Long userId) {
         String encryptedFromCard = cardNumberCrypto.encrypt(request.getFromCard());
         String encryptedToCard = cardNumberCrypto.encrypt(request.getToCard());
         Optional<Card> fromCardOpt = cardsRepository.findByCardNumber(encryptedFromCard);
@@ -76,10 +76,10 @@ public class CardsService {
         Card fromCard = fromCardOpt.get();
         Card toCard = toCardOpt.get();
 
-        if (fromCard.getOwner().getId() != userId || toCard.getOwner().getId() != userId) {
+        if (!fromCard.getOwner().getId().equals(userId) || !toCard.getOwner().getId().equals(userId)) {
             throw new NoAuthorityException("You do not have permission to transfer with these cards");
         }
-        if (fromCard.getId() == toCard.getId() || fromCard.getCardNumber().equals(toCard.getCardNumber())) {
+        if (fromCard.getId().equals(toCard.getId()) || fromCard.getCardNumber().equals(toCard.getCardNumber())) {
             throw new SameCardTransactionException("Transfer from the card to itself is not possible.");
         }
 
@@ -95,13 +95,13 @@ public class CardsService {
         toCard.setBalance(newBalanceToCard);
     }
 
-    public BigDecimal getBalance(int id, int userId) {
+    public BigDecimal getBalance(Long id, Long userId) {
         Card card = checkAuthorityAndGet(id, userId);
         return card.getBalance();
     }
 
     public PageResponse<CardResponse> getUserCards(
-            int userId,
+            Long userId,
             int page,
             int limit,
             String[] sort,
@@ -156,13 +156,13 @@ public class CardsService {
         return new Sort.Order(direction, property);
     }
 
-    private Card checkAuthorityAndGet(int id, int userId) {
+    private Card checkAuthorityAndGet(Long id, Long userId) {
         Optional<Card> card = cardsRepository.findById(id);
         if (card.isEmpty()) {
             throw new CardNotFoundException("Card not found");
         }
         Card cardPresent = card.get();
-        if (cardPresent.getOwner().getId() != userId) {
+        if (!cardPresent.getOwner().getId().equals(userId)) {
             throw new NoAuthorityException("You do not have permission to access this card");
         }
         return cardPresent;

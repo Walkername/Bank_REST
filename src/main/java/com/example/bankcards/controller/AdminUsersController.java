@@ -36,7 +36,7 @@ public class AdminUsersController {
 
     @GetMapping("/{id}")
     public ResponseEntity<UserResponse> getUser(
-            @PathVariable int id
+            @PathVariable Long id
     ) {
         UserResponse userResponse = bankModelMapper.convertToUserResponse(adminUsersService.findOne(id));
         return new ResponseEntity<>(userResponse, HttpStatus.OK);
@@ -44,7 +44,7 @@ public class AdminUsersController {
 
     @PatchMapping("/{id}/role")
     public ResponseEntity<HttpStatus> assignAdminRole(
-            @PathVariable("id") int id
+            @PathVariable("id") Long id
     ) {
         adminUsersService.assignAdminRole(id);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -52,7 +52,7 @@ public class AdminUsersController {
 
     @PatchMapping("/{id}/username")
     public ResponseEntity<HttpStatus> changeUsername(
-            @PathVariable("id") int id,
+            @PathVariable("id") Long id,
             @RequestBody ChangeUsernameRequest request
     ) {
         adminUsersService.changeUsername(id, request.getUsername());
@@ -62,7 +62,7 @@ public class AdminUsersController {
     @Operation(summary = "Get user cards", description = "Get list of user cards with pagination, sorting and filtration")
     @GetMapping("/{userId}/cards")
     public ResponseEntity<PageResponse<CardResponse>> getUserCards(
-            @PathVariable int userId,
+            @PathVariable Long userId,
             @RequestParam(value = "page") Integer page,
             @RequestParam(value = "limit", defaultValue = "10") Integer limit,
             @RequestParam(value = "sort", defaultValue = "balance:desc", required = false) String[] sort,

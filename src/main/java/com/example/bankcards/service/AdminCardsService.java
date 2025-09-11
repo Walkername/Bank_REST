@@ -40,7 +40,7 @@ public class AdminCardsService {
         this.cardNumberCrypto = new CardNumberCrypto(secret);
     }
 
-    public CardResponse findOne(int id) {
+    public CardResponse findOne(Long id) {
         Optional<Card> card = cardsRepository.findById(id);
         if (card.isEmpty()) {
             throw new CardNotFoundException("Card not found");
@@ -56,7 +56,7 @@ public class AdminCardsService {
     }
 
     @Transactional
-    public void create(int userId) {
+    public void create(Long userId) {
         User owner = adminUsersService.findOne(userId);
         if (owner == null) {
             throw new UserNotFoundException("User not found");
@@ -76,7 +76,7 @@ public class AdminCardsService {
     }
 
     @Transactional
-    public void setStatus(int id, CardStatus status) {
+    public void setStatus(Long id, CardStatus status) {
         Optional<Card> card = cardsRepository.findById(id);
         if (card.isEmpty()) {
             throw new CardNotFoundException("Card not found");
@@ -85,7 +85,7 @@ public class AdminCardsService {
     }
 
     @Transactional
-    public void deleteCard(int id) {
+    public void deleteCard(Long id) {
         cardsRepository.deleteById(id);
     }
 

@@ -20,7 +20,7 @@ public class AdminUsersService {
         this.usersRepository = usersRepository;
     }
 
-    public User findOne(int id) {
+    public User findOne(Long id) {
         Optional<User> user = usersRepository.findById(id);
         if (user.isEmpty()) {
             throw new UserNotFoundException("User not found");
@@ -29,7 +29,7 @@ public class AdminUsersService {
     }
 
     @Transactional
-    public void changeUsername(int id, String username) {
+    public void changeUsername(Long id, String username) {
         Optional<User> user = usersRepository.findById(id);
         if (user.isEmpty()) {
             throw new UserNotFoundException("User not found");
@@ -42,7 +42,7 @@ public class AdminUsersService {
     }
 
     @Transactional
-    public void assignAdminRole(int id) {
+    public void assignAdminRole(Long id) {
         Optional<User> user = usersRepository.findById(id);
         if (user.isEmpty()) {
             throw new UserNotFoundException("User not found");

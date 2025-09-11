@@ -50,7 +50,7 @@ public class JWTFilter extends OncePerRequestFilter {
                     DecodedJWT jwt = tokenService.validateAccessToken(token);
                     String role = jwt.getClaim("role").asString();
                     String username = jwt.getClaim("username").asString();
-                    Integer userId = jwt.getClaim("id").asInt();
+                    Long userId = jwt.getClaim("id").asLong();
 
                     UserPrincipal userPrincipal = new UserPrincipal(userId, username, role);
 

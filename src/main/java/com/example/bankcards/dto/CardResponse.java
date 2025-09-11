@@ -6,9 +6,9 @@ import java.math.BigDecimal;
 
 public class CardResponse {
 
-    private int id;
+    private Long id;
 
-    private int ownerId;
+    private Long ownerId;
 
     private String cardNumber;
 
@@ -18,19 +18,19 @@ public class CardResponse {
 
     private BigDecimal balance;
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public int getOwnerId() {
+    public Long getOwnerId() {
         return ownerId;
     }
 
-    public void setOwnerId(int ownerId) {
+    public void setOwnerId(Long ownerId) {
         this.ownerId = ownerId;
     }
 

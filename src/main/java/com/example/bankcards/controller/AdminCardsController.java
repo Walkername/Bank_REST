@@ -25,14 +25,14 @@ public class AdminCardsController {
 
     @GetMapping("/{id}")
     public ResponseEntity<CardResponse> get(
-            @PathVariable("id") int id
+            @PathVariable("id") Long id
     ) {
         return new ResponseEntity<>(adminCardsService.findOne(id), HttpStatus.OK);
     }
 
     @PostMapping("/create/{userId}")
     public ResponseEntity<HttpStatus> create(
-            @PathVariable int userId
+            @PathVariable Long userId
     ) {
         adminCardsService.create(userId);
         return ResponseEntity.ok(HttpStatus.CREATED);
@@ -40,7 +40,7 @@ public class AdminCardsController {
 
     @PatchMapping("/{id}/status")
     public ResponseEntity<HttpStatus> changeStatus(
-            @PathVariable("id") int id,
+            @PathVariable("id") Long id,
             @RequestBody ChangeCardStatusRequest request
     ) {
         if (request.getStatus().equals(CardStatus.EXPIRED)) {
@@ -52,7 +52,7 @@ public class AdminCardsController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<HttpStatus> delete(
-            @PathVariable("id") int id
+            @PathVariable("id") Long id
     ) {
         adminCardsService.deleteCard(id);
         return ResponseEntity.ok(HttpStatus.NO_CONTENT);
