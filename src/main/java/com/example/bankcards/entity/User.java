@@ -4,6 +4,7 @@ import com.example.bankcards.enums.Role;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import java.util.List;
 
@@ -17,10 +18,12 @@ public class User {
     private Long id;
 
     @NotBlank(message = "Username should not be blank")
+    @Size(min = 5, max = 64, message = "Username should be greater than 5 and less than 64")
     @Column(name = "username")
     private String username;
 
     @NotBlank(message = "Password should not be blank")
+    @Size(min = 5, max = 60, message = "Password should be greater than 5 and less than 60")
     @Column(name = "password")
     private String password;
 

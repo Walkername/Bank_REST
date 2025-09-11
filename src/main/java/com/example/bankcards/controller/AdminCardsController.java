@@ -6,6 +6,7 @@ import com.example.bankcards.enums.CardStatus;
 import com.example.bankcards.exception.WrongCardStatus;
 import com.example.bankcards.service.AdminCardsService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,12 +42,13 @@ public class AdminCardsController {
     @PatchMapping("/{id}/status")
     public ResponseEntity<HttpStatus> changeStatus(
             @PathVariable("id") Long id,
-            @RequestBody ChangeCardStatusRequest request
+            @RequestBody @Valid ChangeCardStatusRequest request
     ) {
-        if (request.getStatus().equals(CardStatus.EXPIRED)) {
+        CardStatus status = CardStatus.valueOf(request.getStatus());
+        if (status.equals(CardStatus.EXPIRED)) {
             throw new WrongCardStatus("You can't change card status to expired");
         }
-        adminCardsService.setStatus(id, request.getStatus());
+        adminCardsService.setStatus(id, status);
         return ResponseEntity.ok(HttpStatus.OK);
     }
 

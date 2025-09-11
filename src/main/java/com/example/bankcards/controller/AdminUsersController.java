@@ -10,6 +10,7 @@ import com.example.bankcards.service.AdminUsersService;
 import com.example.bankcards.util.BankModelMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -53,7 +54,7 @@ public class AdminUsersController {
     @PatchMapping("/{id}/username")
     public ResponseEntity<HttpStatus> changeUsername(
             @PathVariable("id") Long id,
-            @RequestBody ChangeUsernameRequest request
+            @RequestBody @Valid ChangeUsernameRequest request
     ) {
         adminUsersService.changeUsername(id, request.getUsername());
         return new ResponseEntity<>(HttpStatus.OK);

@@ -1,16 +1,17 @@
 package com.example.bankcards.dto;
 
-import com.example.bankcards.enums.CardStatus;
+import jakarta.validation.constraints.Pattern;
 
 public class ChangeCardStatusRequest {
 
-    private CardStatus status;
+    @Pattern(regexp = "ACTIVE|BLOCKED", message = "You can use only ACTIVE or BLOCKED")
+    private String status;
 
-    public CardStatus getStatus() {
+    public String getStatus() {
         return status;
     }
 
-    public void setStatus(CardStatus status) {
+    public void setStatus(String status) {
         this.status = status;
     }
 }
